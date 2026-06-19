@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,7 +18,7 @@ import { AbuseModule } from '../abuse/abuse.module';
 @Module({
   imports: [
     RedisModule,
-    AbuseModule,
+    forwardRef(() => AbuseModule),
     TypeOrmModule.forFeature([User, RefreshToken, EmailVerification, PasswordReset]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
