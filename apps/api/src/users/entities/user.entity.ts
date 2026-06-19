@@ -12,7 +12,7 @@ export class User {
   id: string;
 
   @ApiProperty({ example: 'john.farmer@example.com' })
-  @Column({ unique: true, length: 255 })
+  @Column({ type: 'varchar', unique: true, length: 255 })
   email: string;
 
   @ApiPropertyOptional({ example: '+2348012345678' })
@@ -60,7 +60,7 @@ export class User {
   isLocked: boolean;
 
   @ApiPropertyOptional()
-  @Column({ name: 'lock_reason', length: 500, nullable: true })
+  @Column({ name: 'lock_reason', type: 'varchar', length: 500, nullable: true })
   lockReason: string | null;
 
   @ApiPropertyOptional()
@@ -68,7 +68,7 @@ export class User {
   lockedUntil: Date | null;
 
   @ApiPropertyOptional()
-  @Column({ name: 'failed_login_attempts', default: 0 })
+  @Column({ name: 'failed_login_attempts', type: 'int', default: 0 })
   failedLoginAttempts: number;
 
   @ApiPropertyOptional()
