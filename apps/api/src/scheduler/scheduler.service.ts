@@ -95,9 +95,10 @@ export class SchedulerService {
       const now = new Date();
       const result = await this.qrTokenRepo
         .createQueryBuilder('q')
+        .update(QrToken)
+        .set({ usedAt: new Date(0) })
         .where('q.expiresAt < :now', { now })
         .andWhere('q.usedAt IS NULL')
-        .delete()
         .execute();
 
       if (result.affected && result.affected > 0) {

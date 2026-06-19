@@ -11,7 +11,23 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     const port = parseInt(process.env.REDIS_PORT || '6379', 10);
 
     if (url) {
-      this.client = new Redis(url);
+      const redisUrlParsed = new URL(url);
+      const isTls = url.startsWith('rediss://') || redisUrlParsed.port === '6379';
+      this.client = new Redis({
+        host: redisUrlParsed.hostname,
+        port: Number(redisUrlParsed.port) || 6379,
+        password: redisUrlParsed.password || undefined,
+        username: redisUrlParsed.username || undefined,
+        tls: isTls ? { rejectUnauthorized: false } : undefined,
+        lazyConnect: true,
+        retryStrategy: (times) => {
+          if (times > 3) {
+            console.warn('[RedisService] Connection failed, running without Redis');
+            return null;
+          }
+          return Math.min(times * 100, 3000);
+        },
+      });
     } else {
       this.client = new Redis({
         host,
