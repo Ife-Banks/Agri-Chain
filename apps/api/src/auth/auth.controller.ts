@@ -8,9 +8,11 @@ import {
   HttpStatus,
   BadRequestException,
   Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import type { Request } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -37,13 +39,18 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Throttle({ register: { ttl: 3600000, limit: 5 } })
   @Post('register')
   @ApiOperation({ summary: 'Register a new user — sends email verification link' })
   async register(@Body() dto: RegisterDto, @Req() req: Request) {
+    if (dto.website === true) {
+      throw new ForbiddenException('Request rejected');
+    }
     return this.authService.register(dto, getClientIp(req), req.headers['user-agent'] ?? null);
   }
 
   @Public()
+  @Throttle({ login: { ttl: 90000, limit: 5 }, auth: { ttl: 60000, limit: 20 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login — requires email verification, blocked if account is locked' })
@@ -60,6 +67,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { ttl: 60000, limit: 20 } })
   @Post('otp/send')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Send OTP to email or phone' })
@@ -70,6 +78,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { ttl: 60000, limit: 20 } })
   @Post('otp/verify')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify OTP and receive tokens' })
@@ -78,6 +87,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { ttl: 60000, limit: 20 } })
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
@@ -135,6 +145,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { ttl: 60000, limit: 20 } })
   @Post('email/resend')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Resend email verification link' })
@@ -153,6 +164,7 @@ export class AuthController {
   // ─── Password Reset ───────────────────────────────────────────────────────
 
   @Public()
+  @Throttle({ auth: { ttl: 60000, limit: 20 } })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request password reset link — sent only if email exists (prevents enumeration)' })
@@ -161,6 +173,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { ttl: 60000, limit: 20 } })
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reset password using token from email — invalidates all existing sessions' })

@@ -1,5 +1,5 @@
-import { IsEmail, IsString, MinLength, MaxLength, IsOptional, IsEnum, Matches } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsString, MinLength, MaxLength, IsOptional, IsEnum, Matches, IsBoolean } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum RegisterRole {
   FARMER = 'farmer',
@@ -39,4 +39,9 @@ export class RegisterDto {
   @ApiProperty({ enum: RegisterRole })
   @IsEnum(RegisterRole)
   role: RegisterRole;
+
+  @ApiPropertyOptional({ description: 'Leave empty — bots get caught here' })
+  @IsBoolean()
+  @IsOptional()
+  website?: boolean;
 }

@@ -8,6 +8,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { SecurityMiddleware } from './security/security.middleware';
 import { SecurityService } from './security/security.service';
+import { AbuseProtectionService } from './abuse/abuse-protection.service';
 
 function getClientIp(req: any): string | null {
   const forwarded = req.headers['x-forwarded-for'];
@@ -92,7 +93,8 @@ async function bootstrap() {
   });
 
   const securityService = app.get(SecurityService);
-  app.use(new SecurityMiddleware(securityService).use.bind(new SecurityMiddleware(securityService)));
+  const abuseService = app.get(AbuseProtectionService);
+  app.use(new SecurityMiddleware(securityService, abuseService).use.bind(new SecurityMiddleware(securityService, abuseService)));
 
   app.enableCors({
     origin: (origin, callback) => {

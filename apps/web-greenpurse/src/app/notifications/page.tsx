@@ -18,11 +18,11 @@ import {
   Filter,
   Search,
 } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
-import { Card } from '../../../components/ui/card';
-import { Badge } from '../../../components/ui/badge';
-import { Input } from '../../../components/ui/input';
-import { useAuthStore } from '../../../store/auth';
+import { Button } from '../../components/ui/button';
+import { Card } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Input } from '../../components/ui/input';
+import { useAuthStore } from '../../store/auth';
 
 const container = {
   hidden: { opacity: 0 },

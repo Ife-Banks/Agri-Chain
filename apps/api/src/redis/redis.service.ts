@@ -74,6 +74,38 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await this.client.del(key);
   }
 
+  async incrWithExpiry(key: string, ttlSeconds: number): Promise<number> {
+    if (!this.client || this.client.status !== 'ready') return 0;
+    const client = this.client;
+    const exists = await client.exists(key);
+    if (exists) {
+      return client.incr(key);
+    }
+    await client.setex(key, ttlSeconds, '1');
+    return 1;
+  }
+
+  async getCount(key: string): Promise<number> {
+    if (!this.client || this.client.status !== 'ready') return 0;
+    const val = await this.client.get(key);
+    return val ? parseInt(val, 10) : 0;
+  }
+
+  async setWithExpiry(key: string, value: string, ttlSeconds: number): Promise<void> {
+    if (!this.client || this.client.status !== 'ready') return;
+    await this.client.setex(key, ttlSeconds, value);
+  }
+
+  async ttl(key: string): Promise<number> {
+    if (!this.client || this.client.status !== 'ready') return -1;
+    return this.client.ttl(key);
+  }
+
+  async keys(pattern: string): Promise<string[]> {
+    if (!this.client || this.client.status !== 'ready') return [];
+    return this.client.keys(pattern);
+  }
+
   async addToSet(setKey: string, member: string, ttlSeconds?: number): Promise<void> {
     if (!this.client || this.client.status !== 'ready') return;
     await this.client.sadd(setKey, member);

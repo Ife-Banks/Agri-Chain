@@ -19,12 +19,12 @@ import {
   Loader2,
   QrCode,
 } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
-import { Card } from '../../../components/ui/card';
-import { Input } from '../../../components/ui/input';
-import { Separator } from '../../../components/ui/separator';
-import { Avatar } from '../../../components/ui/avatar';
-import { ImageUpload } from '../../../components/ui/image-upload';
+import { Button } from '../../components/ui/button';
+import { Card } from '../../components/ui/card';
+import { Input } from '../../components/ui/input';
+import { Separator } from '../../components/ui/separator';
+import { Avatar } from '../../components/ui/avatar';
+import { ImageUpload } from '../../components/ui/image-upload';
 
 const container = {
   hidden: { opacity: 0 },

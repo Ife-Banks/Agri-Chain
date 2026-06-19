@@ -16,12 +16,12 @@ import {
   Check,
   X,
 } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
-import { Card } from '../../../components/ui/card';
-import { Input } from '../../../components/ui/input';
-import { Badge } from '../../../components/ui/badge';
-import { Separator } from '../../../components/ui/separator';
-import { useAuthStore } from '../../../store/auth';
+import { Button } from '../../components/ui/button';
+import { Card } from '../../components/ui/card';
+import { Input } from '../../components/ui/input';
+import { Badge } from '../../components/ui/badge';
+import { Separator } from '../../components/ui/separator';
+import { useAuthStore } from '../../store/auth';
 
 const container = {
   hidden: { opacity: 0 },

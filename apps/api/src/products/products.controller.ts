@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -14,6 +15,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @Throttle({ search: { ttl: 60000, limit: 30 } })
   @Public()
   @Get()
   @ApiOperation({ summary: 'List products with filters and pagination' })
@@ -21,6 +23,7 @@ export class ProductsController {
     return this.productsService.findAll(query);
   }
 
+  @Throttle({ search: { ttl: 60000, limit: 30 }, default: { ttl: 60000, limit: 60 } })
   @Public()
   @Get('trending')
   @ApiOperation({ summary: 'Get trending products (newest + most active)' })
@@ -28,6 +31,7 @@ export class ProductsController {
     return this.productsService.findTrending();
   }
 
+  @Throttle({ search: { ttl: 60000, limit: 30 }, default: { ttl: 60000, limit: 60 } })
   @Public()
   @Get('feed')
   @ApiOperation({
@@ -37,6 +41,7 @@ export class ProductsController {
     return this.productsService.getFeed(userId);
   }
 
+  @Throttle({ search: { ttl: 60000, limit: 30 } })
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get single product with images, details, category, store' })

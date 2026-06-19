@@ -13,10 +13,12 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { PinGuard } from './guards/pin.guard';
 import { RedisModule } from '../redis/redis.module';
+import { AbuseModule } from '../abuse/abuse.module';
 
 @Module({
   imports: [
     RedisModule,
+    AbuseModule,
     TypeOrmModule.forFeature([User, RefreshToken, EmailVerification, PasswordReset]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({

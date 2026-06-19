@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { AiService } from './ai.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
@@ -28,6 +29,7 @@ import {
 export class AiController {
   constructor(private readonly aiService: AiService) {}
 
+  @Throttle({ ai: { ttl: 60000, limit: 10 } })
   @UseGuards(JwtAuthGuard)
   @Post('detect-disease')
   @HttpCode(HttpStatus.OK)
@@ -46,6 +48,7 @@ export class AiController {
     return this.aiService.detectDisease(buffer, dto);
   }
 
+  @Throttle({ ai: { ttl: 60000, limit: 20 } })
   @UseGuards(JwtAuthGuard)
   @Post('price-prediction')
   @HttpCode(HttpStatus.OK)
@@ -58,6 +61,7 @@ export class AiController {
     return this.aiService.predictPrice(dto);
   }
 
+  @Throttle({ ai: { ttl: 60000, limit: 20 } })
   @UseGuards(JwtAuthGuard)
   @Post('crop-recommendation')
   @HttpCode(HttpStatus.OK)
@@ -70,6 +74,7 @@ export class AiController {
     return this.aiService.recommendCrops(dto);
   }
 
+  @Throttle({ default: { ttl: 60000, limit: 30 } })
   @Public()
   @Get('market-insights')
   @ApiOperation({
@@ -80,6 +85,7 @@ export class AiController {
     return this.aiService.getMarketInsights(dto);
   }
 
+  @Throttle({ default: { ttl: 60000, limit: 30 } })
   @Public()
   @Post('chat')
   @HttpCode(HttpStatus.OK)

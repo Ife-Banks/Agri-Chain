@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard, ThrottlerStorage } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -25,6 +25,7 @@ import { AddressesModule } from './orders/addresses/addresses.module';
 import { RedisModule } from './redis/redis.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { SecurityModule } from './security/security.module';
+import { AbuseModule } from './abuse/abuse.module';
 
 @Module({
   imports: [
@@ -45,9 +46,30 @@ import { SecurityModule } from './security/security.module';
         ttl: 60000,
         limit: 30,
       },
+      {
+        name: 'login',
+        ttl: 90000,
+        limit: 5,
+      },
+      {
+        name: 'register',
+        ttl: 3600000,
+        limit: 5,
+      },
+      {
+        name: 'ai',
+        ttl: 60000,
+        limit: 10,
+      },
+      {
+        name: 'search',
+        ttl: 60000,
+        limit: 30,
+      },
     ]),
     RedisModule,
     SchedulerModule,
+    AbuseModule,
     AuthModule,
     UsersModule,
     ProductsModule,

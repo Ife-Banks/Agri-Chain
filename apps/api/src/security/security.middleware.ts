@@ -1,6 +1,7 @@
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
+import { Injectable, NestMiddleware, Logger, ForbiddenException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { SecurityService } from './security.service';
+import { AbuseProtectionService } from '../abuse/abuse-protection.service';
 
 interface RequestLog {
   timestamp: number;
@@ -15,8 +16,12 @@ export class SecurityMiddleware implements NestMiddleware {
   private requestLog: RequestLog[] = [];
   private readonly WINDOW_MS = 60 * 1000;
   private readonly ANOMALY_THRESHOLD = 100;
+  private readonly BOT_UA_THRESHOLD = 5;
 
-  constructor(private readonly securityService: SecurityService) {}
+  constructor(
+    private readonly securityService: SecurityService,
+    private readonly abuseService: AbuseProtectionService,
+  ) {}
 
   use(req: Request, res: Response, next: NextFunction) {
     const ip = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim()
@@ -25,6 +30,15 @@ export class SecurityMiddleware implements NestMiddleware {
     const userAgent = req.headers['user-agent'] ?? null;
     const path = req.path;
     const method = req.method;
+
+    if (this.abuseService.isSuspiciousUserAgent(userAgent) && !this.abuseService.isKnownBot(userAgent)) {
+      this.trackRequest(ip, path, method);
+      const windowRequests = this.getRequestsFromIp(ip);
+      if (windowRequests > this.BOT_UA_THRESHOLD) {
+        this.logger.warn(`[SECURITY] Bot suspected: IP=${ip} UA="${userAgent}" reqs=${windowRequests}`);
+        this.securityService.logSuspiciousTraffic(ip ?? 'unknown', userAgent, path, method);
+      }
+    }
 
     this.trackRequest(ip, path, method);
 
@@ -46,7 +60,14 @@ export class SecurityMiddleware implements NestMiddleware {
       this.securityService.logSuspiciousTraffic(ip ?? 'unknown', userAgent, path, method);
     }
 
+    res.setHeader('X-Request-ID', req.headers['x-request-id'] as string ?? `mid-${Date.now()}`);
     next();
+  }
+
+  private getRequestsFromIp(ip: string | null): number {
+    return this.requestLog.filter(
+      (r) => r.ip === ip && Date.now() - r.timestamp < this.WINDOW_MS,
+    ).length;
   }
 
   private trackRequest(ip: string | null, path: string, method: string) {

@@ -5,6 +5,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Logger,
+  GatewayTimeoutException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,6 +18,7 @@ import { RedisService } from '../redis/redis.service';
 import { AppConfigService } from '../config/config.service';
 import { SecurityService } from '../security/security.service';
 import { SecurityEventType } from '../security/entities/security-event.entity';
+import { AbuseProtectionService } from '../abuse/abuse-protection.service';
 import {
   generateSecureToken,
   hashToken,
@@ -55,6 +57,7 @@ export class AuthService {
     private readonly redisService: RedisService,
     private readonly configService: AppConfigService,
     private readonly securityService: SecurityService,
+    private readonly abuseService: AbuseProtectionService,
   ) {}
 
   private async logAuth(
@@ -88,6 +91,25 @@ export class AuthService {
   // ─── Registration ────────────────────────────────────────────────────────
 
   async register(dto: RegisterDto, ip?: string | null, userAgent?: string | null) {
+    if (this.abuseService.isSuspiciousUserAgent(userAgent ?? null)) {
+      this.logger.warn(`[AUTH] Bot suspected on registration | IP: ${ip ?? '?'} | UA: ${userAgent ?? 'none'}`);
+    }
+
+    if (ip) {
+      const regStatus = await this.abuseService.recordRegistration(ip);
+      if (regStatus.blocked) {
+        this.logger.warn(`[AUTH] Registration rate limited | IP: ${ip} | Attempts: ${regStatus.count}`);
+        this.logAuth(SecurityEventType.REGISTER_FAILED, {
+          ip,
+          userAgent,
+          identifier: dto.email,
+          suspicious: true,
+          reason: 'IP rate limited',
+        });
+        throw new GatewayTimeoutException('Too many registration attempts. Please try again later.');
+      }
+    }
+
     const passwordError = validatePasswordStrength(dto.password, dto.username, dto.email);
     if (passwordError) {
       throw new BadRequestException(passwordError);
@@ -152,6 +174,24 @@ export class AuthService {
   async login(dto: LoginDto, ip?: string | null, userAgent?: string | null) {
     if (!dto.email && !dto.phone) {
       throw new BadRequestException('Email or phone is required');
+    }
+
+    if (ip) {
+      const loginStatus = await this.abuseService.recordLoginAttempt(ip);
+      if (loginStatus.blocked) {
+        this.logger.warn(`[AUTH] Login blocked per-IP rate limit | IP: ${ip} | Attempts: ${loginStatus.attempts}`);
+        this.logAuth(SecurityEventType.LOGIN_FAILED, {
+          ip,
+          userAgent,
+          identifier: dto.email ?? dto.phone ?? 'unknown',
+          suspicious: true,
+          reason: `IP blocked: ${loginStatus.attempts} failed attempts`,
+          attemptCount: loginStatus.attempts,
+        });
+        throw new ForbiddenException(
+          `Too many failed login attempts from this IP. Try again in ${Math.ceil(loginStatus.retryAfterSecs / 60)} minute(s).`,
+        );
+      }
     }
 
     const identifier = dto.email ?? dto.phone ?? 'unknown';
@@ -262,6 +302,8 @@ export class AuthService {
     }
     user.lastLoginAt = new Date();
     await this.userRepo.save(user);
+
+    if (ip) await this.abuseService.recordSuccessfulLogin(ip);
 
     const roles = this.getUserRoles(user);
     const { accessToken, refreshToken } = await this.generateTokenPair(user, roles);
