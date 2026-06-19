@@ -51,6 +51,30 @@ export class User {
   @Column({ name: 'is_farm_customer', default: false })
   isFarmCustomer: boolean;
 
+  @ApiProperty({ example: false })
+  @Column({ name: 'is_email_verified', default: false })
+  isEmailVerified: boolean;
+
+  @ApiProperty({ example: false })
+  @Column({ name: 'is_locked', default: false })
+  isLocked: boolean;
+
+  @ApiPropertyOptional()
+  @Column({ name: 'lock_reason', length: 500, nullable: true })
+  lockReason: string | null;
+
+  @ApiPropertyOptional()
+  @Column({ name: 'locked_until', type: 'timestamp', nullable: true })
+  lockedUntil: Date | null;
+
+  @ApiPropertyOptional()
+  @Column({ name: 'failed_login_attempts', default: 0 })
+  failedLoginAttempts: number;
+
+  @ApiPropertyOptional()
+  @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
+  lastLoginAt: Date | null;
+
   @ApiPropertyOptional({ description: 'User creation timestamp' })
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

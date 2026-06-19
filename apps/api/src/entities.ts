@@ -29,6 +29,8 @@ import { WeatherAlert } from './markets/entities/weather-alert.entity';
 import { PriceAlert } from './markets/entities/price-alert.entity';
 import { Notification } from './notifications/entities/notification.entity';
 import { SecurityEvent } from './security/entities/security-event.entity';
+import { EmailVerification } from './auth/entities/email-verification.entity';
+import { PasswordReset } from './auth/entities/password-reset.entity';
 
 export const entities = [
   User,
@@ -62,6 +64,8 @@ export const entities = [
   PriceAlert,
   Notification,
   SecurityEvent,
+  EmailVerification,
+  PasswordReset,
 ];
 
 export {

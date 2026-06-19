@@ -15,4 +15,5 @@ export interface JwtPayload {
   iat: number;
   exp: number;
   jti?: string;
+  isEmailVerified?: boolean;
 }

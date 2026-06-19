@@ -4,6 +4,8 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { RefreshToken } from '../users/entities/refresh-token.entity';
+import { EmailVerification } from './entities/email-verification.entity';
+import { PasswordReset } from './entities/password-reset.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -15,7 +17,7 @@ import { RedisModule } from '../redis/redis.module';
 @Module({
   imports: [
     RedisModule,
-    TypeOrmModule.forFeature([User, RefreshToken]),
+    TypeOrmModule.forFeature([User, RefreshToken, EmailVerification, PasswordReset]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'dev-secret-change-in-production',

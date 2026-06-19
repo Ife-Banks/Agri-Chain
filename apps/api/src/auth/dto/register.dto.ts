@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, MaxLength, IsOptional, IsEnum } from 'class-validator';
+import { IsEmail, IsString, MinLength, MaxLength, IsOptional, IsEnum, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum RegisterRole {
@@ -23,9 +23,17 @@ export class RegisterDto {
   @MinLength(10)
   phone: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Minimum 8 chars, must contain uppercase, lowercase, number and special character' })
   @IsString()
   @MinLength(8)
+  @MaxLength(128)
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/,
+    {
+      message:
+        'Password must be 8+ chars with at least 1 uppercase, 1 lowercase, 1 number, and 1 special character',
+    },
+  )
   password: string;
 
   @ApiProperty({ enum: RegisterRole })
