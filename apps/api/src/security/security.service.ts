@@ -186,9 +186,9 @@ const event = this.eventRepo.create({
     try {
       const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const result = await this.eventRepo
-        .createQueryBuilder('e')
-        .where('e.createdAt < :cutoff', { cutoff })
+        .createQueryBuilder()
         .delete()
+        .where('createdAt < :cutoff', { cutoff })
         .execute();
       if (result.affected && result.affected > 0) {
         this.logger.log(`[Security] Cleaned up ${result.affected} old security events`);
