@@ -24,9 +24,11 @@ import { CouponsModule } from './coupons/coupons.module';
 import { AddressesModule } from './orders/addresses/addresses.module';
 import { RedisModule } from './redis/redis.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { SecurityModule } from './security/security.module';
 
 @Module({
   imports: [
+    SecurityModule,
     ThrottlerModule.forRoot([
       {
         name: 'default',
