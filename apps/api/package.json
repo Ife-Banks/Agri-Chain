@@ -60,5 +60,8 @@
     "ts-loader": "^9.5.0",
     "ts-node": "^10.9.0",
     "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }
