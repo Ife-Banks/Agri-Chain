@@ -15,9 +15,11 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { WalletService } from './wallet.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { PinGuard } from '../auth/guards/pin.guard';
 import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
 import type { JwtPayload } from '../common/decorators/current-user.decorator';
 import {
   DepositDto,
@@ -61,7 +63,10 @@ export class WalletController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get wallet by ID' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get wallet by ID (admin only)' })
   async getWalletById(@Param('id') id: string) {
     return this.walletService.getWalletById(id);
   }

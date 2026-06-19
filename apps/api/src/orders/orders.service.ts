@@ -212,7 +212,7 @@ export class OrdersService {
     return order;
   }
 
-  async updateStatus(id: string, dto: UpdateOrderStatusDto, userId: string) {
+  async updateStatus(id: string, dto: UpdateOrderStatusDto, userId: string, isAdmin: boolean) {
     const order = await this.orderRepo.findOne({ where: { id } });
     if (!order) throw new NotFoundException('Order not found');
 

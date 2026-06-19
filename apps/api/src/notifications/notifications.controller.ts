@@ -14,6 +14,8 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('Notifications')
@@ -66,6 +68,9 @@ export class NotificationsController {
   }
 
   @Post('admin/broadcast')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Send a notification to all users (admin only)' })
   async broadcast(@Body() body: { type: string; title: string; body: string }) {
     const result = await this.notificationsService.broadcast({
@@ -77,8 +82,11 @@ export class NotificationsController {
   }
 
   @Delete('cleanup')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Delete read notifications older than 30 days' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete read notifications older than N days (admin only)' })
   async cleanup(@Query('days') days = '30') {
     const deleted = await this.notificationsService.deleteOldRead(parseInt(days, 10));
     return { deleted };

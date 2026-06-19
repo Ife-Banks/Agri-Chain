@@ -77,13 +77,15 @@ export class OrdersController {
 
   @Patch('orders/:id/status')
   @UseGuards(RolesGuard)
-  @Roles('admin', 'agric_enterprise')
-  @ApiOperation({ summary: 'Update order status (Admin/Logistics only)' })
+  @Roles('admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update order status (Admin only)' })
   async updateStatus(
     @Param('id') id: string,
     @CurrentUser('sub') userId: string,
+    @CurrentUser('roles') roles: string[],
     @Body() dto: UpdateOrderStatusDto,
   ) {
-    return this.ordersService.updateStatus(id, dto, userId);
+    return this.ordersService.updateStatus(id, dto, userId, roles.includes('admin'));
   }
 }

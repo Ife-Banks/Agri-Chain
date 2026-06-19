@@ -2,6 +2,8 @@ import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards } from '@ne
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { LogisticsService } from './logistics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
 import { AssignDriverDto } from './dto/assign-driver.dto';
 import { UpdateDeliveryStatusDto } from './dto/update-delivery-status.dto';
 import { PushTrackingDto } from './dto/push-tracking.dto';
@@ -11,7 +13,8 @@ import { CreateWarehousingDto } from './dto/create-warehousing.dto';
 
 @ApiTags('Logistics')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin', 'agric_enterprise')
 @Controller('logistics')
 export class LogisticsController {
   constructor(private readonly logisticsService: LogisticsService) {}
@@ -94,7 +97,8 @@ export class LogisticsController {
   }
 
   @Get('warehousing')
-  @ApiOperation({ summary: 'List warehousing requests (optional farmer filter)' })
+  @Roles('admin')
+  @ApiOperation({ summary: 'List warehousing requests (admin only)' })
   @ApiQuery({ name: 'farmerId', required: false })
   async listWarehousing(@Query('farmerId') farmerId?: string) {
     return this.logisticsService.listWarehousing(farmerId);

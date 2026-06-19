@@ -124,6 +124,15 @@ export class StorageService {
     return { key, url: `https://${bucket}.s3.amazonaws.com/${key}`, size: file.size };
   }
 
+  private resolveSafePath(key: string): string {
+    const base = path.resolve(this.localUploadDir);
+    const resolved = path.resolve(base, key);
+    if (!resolved.startsWith(base)) {
+      throw new BadRequestException('Invalid file path');
+    }
+    return resolved;
+  }
+
   async deleteFile(key: string): Promise<void> {
     if (this.provider === 'cloudinary') {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -150,12 +159,12 @@ export class StorageService {
       return;
     }
 
-    const filePath = path.join(this.localUploadDir, key);
+    const filePath = this.resolveSafePath(key);
     if (fs.existsSync(filePath)) await fs.promises.unlink(filePath);
   }
 
   async serveLocalFile(key: string): Promise<{ path: string; mimeType: string }> {
-    const filePath = path.join(this.localUploadDir, key);
+    const filePath = this.resolveSafePath(key);
     if (!fs.existsSync(filePath)) throw new BadRequestException('File not found');
     const ext = path.extname(key).toLowerCase();
     const mimeTypes: Record<string, string> = {
