@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply min-h-screen bg-zinc-950 text-zinc-50 antialiased;
+  }
+
+  * {
+    @apply border-zinc-200 dark:border-zinc-800;
+  }
+
+  ::selection {
+    @apply bg-emerald-500/20 text-emerald-100;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

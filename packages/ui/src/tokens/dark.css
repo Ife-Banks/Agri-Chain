@@ -1,0 +1,10 @@
+[data-theme="dark"] {
+  --color-bg-page: #1A202C;
+  --color-bg-surface: #2D3748;
+  --color-bg-subtle: #4A5568;
+  --color-border-default: #4A5568;
+  --color-border-strong: #718096;
+  --color-text-primary: #E2E8F0;
+  --color-text-secondary: #A0AEC0;
+  --color-text-disabled: #4A5568;
+}

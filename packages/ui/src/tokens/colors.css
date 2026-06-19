@@ -1,0 +1,28 @@
+:root {
+  /* Brand Green Scale */
+  --color-green-50: #E8F5EC;
+  --color-green-100: #C6E6CE;
+  --color-green-200: #8ECFA0;
+  --color-green-400: #2D8A50;
+  --color-green-600: #1A6B3A;
+  --color-green-800: #0F4A28;
+  --color-green-900: #062D18;
+
+  /* Semantic Colours */
+  --color-success: #1A6B3A;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+  --color-info: #1E40AF;
+  --color-invest: #2D8A50;
+
+  /* Neutral Scale */
+  --color-bg-page: #F7F9FB;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-subtle: #F0F4F8;
+  --color-border-default: #CBD5E0;
+  --color-border-strong: #A0AEC0;
+  --color-text-primary: #2D3748;
+  --color-text-secondary: #718096;
+  --color-text-disabled: #CBD5E0;
+  --color-dark-sidebar: #1A202C;
+}

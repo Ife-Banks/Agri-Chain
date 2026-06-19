@@ -1,0 +1,58 @@
+node_modules/
+dist/
+.next/
+.turbo/
+*.log
+coverage/
+.cache/
+.DS_Store
+*.tsbuildinfo
+
+# Environment files — NEVER commit real credentials
+.env
+.env.development
+.env.production
+.env.staging
+.env.*.local
+.env.local
+
+# Keep example files (safe to commit)
+!.env.example
+
+# Per-app env files (NEVER commit real envs)
+apps/api/.env
+apps/web-greenpurse/.env.local
+apps/web-greensc/.env.local
+apps/web-admin/.env.local
+apps/web-virtualfarm/.env.local
+
+# Keep per-app example files (safe to commit)
+!apps/api/.env.example
+!apps/web-greenpurse/.env.example
+!apps/web-greensc/.env.example
+!apps/web-admin/.env.example
+!apps/web-virtualfarm/.env.example
+
+# Build outputs
+apps/api/dist/
+apps/web-greenpurse/.next/
+apps/web-greensc/.next/
+apps/web-admin/.next/
+apps/web-virtualfarm/.next/
+
+# Uploaded files
+uploads/
+
+# Secrets (generic patterns)
+*secret*
+*credentials*
+*.pem
+*.key
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+Thumbs.db

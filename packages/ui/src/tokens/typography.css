@@ -1,0 +1,14 @@
+:root {
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-serif: 'Lora', Georgia, serif;
+
+  --text-display: 32px;
+  --text-h1: 24px;
+  --text-h2: 18px;
+  --text-h3: 15px;
+  --text-body: 14px;
+  --text-sm: 13px;
+  --text-caption: 12px;
+  --text-overline: 11px;
+}
