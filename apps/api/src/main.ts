@@ -82,12 +82,18 @@ async function bootstrap() {
     const originalEnd = res.end;
     res.end = function (...args: any[]) {
       const duration = Date.now() - req.startTime;
-      const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'log';
-      const logFn = level === 'error' ? logger.error : level === 'warn' ? logger.warn : logger.log;
-      logFn(
-        `[${req.method}] ${req.path} ${res.statusCode} ${duration}ms — ${getClientIp(req) ?? 'unknown IP'}`,
-      );
-      originalEnd.apply(res, args);
+      const message =
+        `[${req.method}] ${req.path} ${res.statusCode} ${duration}ms — ${getClientIp(req) ?? 'unknown IP'}`;
+
+      if (res.statusCode >= 500) {
+        logger.error(message);
+      } else if (res.statusCode >= 400) {
+        logger.warn(message);
+      } else {
+        logger.log(message);
+      }
+
+      return originalEnd.apply(this, args);
     };
     next();
   });
