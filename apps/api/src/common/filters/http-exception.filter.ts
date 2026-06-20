@@ -1,11 +1,9 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { SecurityService } from '../../security/security.service';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger('HttpExceptionFilter');
-
   constructor(private readonly securityService?: SecurityService) {}
 
   async catch(exception: unknown, host: ArgumentsHost) {
@@ -40,18 +38,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
     } else if (exception instanceof Error) {
       message = exception.message;
-      this.logger.error(
+      console.error(
         `[${requestId}] Unhandled exception on ${method} ${path}: ${exception.message}`,
         exception.stack,
       );
     }
 
     if (status >= 500) {
-      this.logger.error(
+      console.error(
         `[${requestId}] ${method} ${path} → ${status} (${durationMs}ms) | IP: ${ip ?? '?'} | UID: ${userId ?? '?'}`,
       );
     } else if (status >= 400) {
-      this.logger.warn(
+      console.warn(
         `[${requestId}] ${method} ${path} → ${status} (${durationMs}ms) | IP: ${ip ?? '?'} | UID: ${userId ?? '?'}`,
       );
     }
