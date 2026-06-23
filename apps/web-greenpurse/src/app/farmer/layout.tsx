@@ -68,6 +68,7 @@ function Sidebar({
   const router = useRouter();
 
   const isActive = (href: string) => {
+    if (!pathname) return false;
     if (href === '/farmer') return pathname === '/farmer';
     return pathname.startsWith(href);
   };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from './cn';
 
-type BadgeVariant = 'default' | 'secondary' | 'warning' | 'destructive';
+type BadgeVariant = 'default' | 'secondary' | 'warning' | 'destructive' | 'success';
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
@@ -12,6 +12,7 @@ const variantClass: Record<BadgeVariant, string> = {
   secondary: 'ui-badge--secondary',
   warning: 'ui-badge--warning',
   destructive: 'ui-badge--destructive',
+  success: 'ui-badge--success',
 };
 
 export function Badge({ variant = 'default', className, ...props }: BadgeProps) {

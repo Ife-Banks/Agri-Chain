@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Button } from '../../../../components/ui/button';
-import { Card } from '../../../../components/ui/card';
-import { Input } from '../../../../components/ui/input';
-import { Separator } from '../../../../components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 
 const container = {
   hidden: { opacity: 0 },
@@ -68,9 +68,9 @@ interface FormErrors {
 }
 
 export default function EditProductPage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const router = useRouter();
-  const productId = params.id as string;
+  const productId = params?.id as string;
 
   const [form, setForm] = useState<FormData>({
     title: '',

@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 class ApiService {
   private client: AxiosInstance;
@@ -8,7 +8,7 @@ class ApiService {
 
   constructor() {
     this.client = axios.create({
-      baseURL: API_BASE_URL,
+      baseURL: `${API_BASE_URL}/api/v1`,
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
@@ -101,106 +101,173 @@ export function getApiError(error: unknown): string {
 }
 
 export const authApi = {
-  login: (email: string, password: string) => api.post<{ token: string; user: any }>('/api/auth/login', { email, password }),
-  register: (data: { email: string; password: string; username: string; role?: string }) => api.post<{ token: string; user: any }>('/api/auth/register', data),
-  logout: () => api.post('/api/auth/logout'),
-  refreshToken: (refreshToken: string) => api.post<{ token: string }>('/api/auth/refresh', { refreshToken }),
-  forgotPassword: (email: string) => api.post('/api/auth/forgot-password', { email }),
-  resetPassword: (token: string, password: string) => api.post('/api/auth/reset-password', { token, password }),
-  enable2FA: () => api.post<{ qrCode: string }>('/api/auth/2fa/enable'),
-  verify2FA: (code: string) => api.post<{ success: boolean }>('/api/auth/2fa/verify', { code }),
-  disable2FA: (code: string) => api.post('/api/auth/2fa/disable', { code }),
+  login: (email: string, password: string) =>
+    api.post<{ accessToken: string; refreshToken: string; user: any }>('/auth/login', { email, password }),
+  register: (data: { email: string; password: string; username: string; phone: string; role: string }) =>
+    api.post<{ user: any; emailVerificationToken: string }>('/auth/register', data),
+  logout: (refreshToken: string) => api.post('/auth/logout', { refreshToken }),
+  refreshToken: (refreshToken: string) =>
+    api.post<{ accessToken: string; refreshToken: string }>('/auth/refresh', { refreshToken }),
+  forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (userId: string, token: string, newPassword: string) =>
+    api.post('/auth/reset-password', { userId, token, newPassword }),
+  verifyEmail: (userId: string, token: string) =>
+    api.post<{ user: any; accessToken: string; refreshToken: string }>('/auth/email/verify', { userId, token }),
+  resendVerification: (email: string) => api.post('/auth/email/resend', { email }),
+  verifyPin: (userId: string, pin: string) => api.post<{ success: boolean }>('/auth/login/pin', { pin }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.put('/auth/password', { currentPassword, newPassword }),
+  sendOtp: (email?: string, phone?: string) =>
+    api.post('/auth/otp/send', { email, phone }),
+  verifyOtp: (identifier: string, otp: string) =>
+    api.post<{ accessToken: string; refreshToken: string; user: any }>('/auth/otp/verify', { identifier, otp }),
 };
 
 export const userApi = {
-  getProfile: () => api.get<any>('/api/users/me'),
-  updateProfile: (data: Partial<{ username: string; email: string; phone?: string; avatar?: string }>) => api.patch<any>('/api/users/me', data),
-  changePassword: (currentPassword: string, newPassword: string) => api.post('/api/users/change-password', { currentPassword, newPassword }),
-  getNotifications: (params?: { page?: number; limit?: number; read?: boolean }) => api.get<PaginatedResponse<any>>('/api/notifications', { params }),
-  markNotificationRead: (id: string) => api.patch(`/api/notifications/${id}`, { read: true }),
-  markAllNotificationsRead: () => api.post('/api/notifications/mark-all-read'),
-  deleteNotification: (id: string) => api.delete(`/api/notifications/${id}`),
+  getProfile: () => api.get<any>('/users/me'),
+  updateProfile: (data: Partial<{ username: string; email: string; phone?: string; avatar?: string }>) =>
+    api.put<any>('/users/me/profile', data),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.put<any>('/users/me/password', { currentPassword, newPassword }),
+  getNotifications: (params?: { page?: number; limit?: number; unreadOnly?: boolean }) =>
+    api.get<PaginatedResponse<any>>('/notifications', { params }),
+  markNotificationRead: (id: string) => api.patch(`/notifications/${id}/read`),
+  markAllNotificationsRead: () => api.patch('/notifications/read-all'),
+  deleteNotification: (id: string) => api.delete(`/notifications/${id}`),
 };
 
 export const productApi = {
   getProducts: (params?: { page?: number; limit?: number; search?: string; category?: string; status?: string }) =>
-    api.get<PaginatedResponse<any>>('/api/products', { params }),
-  getProduct: (id: string) => api.get<any>(`/api/products/${id}`),
-  createProduct: (data: any) => api.post<any>('/api/products', data),
-  updateProduct: (id: string, data: any) => api.put<any>(`/api/products/${id}`, data),
-  deleteProduct: (id: string) => api.delete(`/api/products/${id}`),
-  updateProductStatus: (id: string, status: 'active' | 'inactive') => api.patch<any>(`/api/products/${id}`, { status }),
+    api.get<PaginatedResponse<any>>('/products', { params }),
+  getProduct: (id: string) => api.get<any>(`/products/${id}`),
+  getTrending: () => api.get<any>('/products/trending'),
+  getFeed: () => api.get<any>('/products/feed'),
+  createProduct: (data: any) => api.post<any>('/products', data),
+  updateProduct: (id: string, data: any) => api.patch<any>(`/products/${id}`, data),
+  deleteProduct: (id: string) => api.delete(`/products/${id}`),
 };
 
 export const orderApi = {
   getOrders: (params?: { page?: number; limit?: number; status?: string }) =>
-    api.get<PaginatedResponse<any>>('/api/orders', { params }),
-  getOrder: (id: string) => api.get<any>(`/api/orders/${id}`),
-  updateOrderStatus: (id: string, status: string) => api.patch<any>(`/api/orders/${id}`, { status }),
-  getOrderStats: () => api.get<any>('/api/orders/stats'),
+    api.get<PaginatedResponse<any>>('/orders', { params }),
+  getOrder: (id: string) => api.get<any>(`/orders/${id}`),
+  updateOrderStatus: (id: string, status: string) =>
+    api.patch<any>(`/orders/${id}/status`, { status }),
+  createOrder: (data: any) => api.post<any>('/orders', data),
+  getCart: () => api.get<any>('/cart'),
+  addCartItem: (data: { productId: string; quantity: number }) =>
+    api.post<any>('/cart/items', data),
+  updateCartItem: (itemId: string, data: { quantity: number }) =>
+    api.patch<any>(`/cart/items/${itemId}`, data),
+  applyCoupon: (data: { code: string }) => api.post<any>('/cart/coupon', data),
 };
 
 export const categoryApi = {
-  getCategories: (params?: { page?: number; limit?: number; search?: string; status?: string }) =>
-    api.get<PaginatedResponse<any>>('/api/categories', { params }),
-  getCategory: (id: string) => api.get<any>(`/api/categories/${id}`),
-  createCategory: (data: { name: string; description?: string; icon?: string }) => api.post<any>('/api/categories', data),
-  updateCategory: (id: string, data: { name?: string; description?: string; icon?: string; status?: string }) =>
-    api.put<any>(`/api/categories/${id}`, data),
-  deleteCategory: (id: string) => api.delete(`/api/categories/${id}`),
-  toggleCategoryStatus: (id: string) => api.post<any>(`/api/categories/${id}/toggle-status`),
+  getCategories: (params?: { page?: number; limit?: number; search?: string }) =>
+    api.get<PaginatedResponse<any>>('/categories', { params }),
+  getCategory: (id: string) => api.get<any>(`/categories/${id}`),
+  createCategory: (data: { name: string; description?: string; icon?: string }) =>
+    api.post<any>('/categories', data),
+  updateCategory: (id: string, data: { name?: string; description?: string; icon?: string }) =>
+    api.put<any>(`/categories/${id}`, data),
+  deleteCategory: (id: string) => api.delete(`/categories/${id}`),
 };
 
 export const storeApi = {
-  getStores: (params?: { page?: number; limit?: number; search?: string; status?: string }) =>
-    api.get<PaginatedResponse<any>>('/api/stores', { params }),
-  getStore: (id: string) => api.get<any>(`/api/stores/${id}`),
-  createStore: (data: any) => api.post<any>('/api/stores', data),
-  updateStore: (id: string, data: any) => api.put<any>(`/api/stores/${id}`, data),
-  deleteStore: (id: string) => api.delete(`/api/stores/${id}`),
-  toggleStoreStatus: (id: string) => api.post<any>(`/api/stores/${id}/toggle-status`),
+  getStores: (params?: { page?: number; limit?: number; search?: string }) =>
+    api.get<PaginatedResponse<any>>('/stores', { params }),
+  getStore: (id: string) => api.get<any>(`/stores/${id}`),
+  getMyStore: () => api.get<any>('/stores/farmer/me'),
+  createStore: (data: any) => api.post<any>('/stores', data),
+  updateStore: (id: string, data: any) => api.put<any>(`/stores/${id}`, data),
+  deleteStore: (id: string) => api.delete(`/stores/${id}`),
 };
 
 export const couponApi = {
-  getCoupons: (params?: { page?: number; limit?: number; search?: string; status?: string }) =>
-    api.get<PaginatedResponse<any>>('/api/coupons', { params }),
-  getCoupon: (id: string) => api.get<any>(`/api/coupons/${id}`),
-  createCoupon: (data: { code: string; type: 'percentage' | 'fixed'; value: number; minOrder?: number; maxDiscount?: number; expiresAt?: string; status?: string }) =>
-    api.post<any>('/api/coupons', data),
-  updateCoupon: (id: string, data: any) => api.put<any>(`/api/coupons/${id}`, data),
-  deleteCoupon: (id: string) => api.delete(`/api/coupons/${id}`),
-  toggleCouponStatus: (id: string) => api.post<any>(`/api/coupons/${id}/toggle-status`),
+  getCoupons: (params?: { page?: number; limit?: number; search?: string }) =>
+    api.get<PaginatedResponse<any>>('/coupons', { params }),
+  getCoupon: (id: string) => api.get<any>(`/coupons/${id}`),
+  createCoupon: (data: { code: string; type: 'percentage' | 'fixed'; value: number; minOrderValue?: number; maxDiscount?: number; expiresAt?: string }) =>
+    api.post<any>('/coupons', data),
+  updateCoupon: (id: string, data: any) => api.put<any>(`/coupons/${id}`, data),
+  deleteCoupon: (id: string) => api.delete(`/coupons/${id}`),
+  validateCoupon: (code: string) => api.post<any>('/coupons/validate', { code }),
 };
 
 export const walletApi = {
-  getWallet: () => api.get<any>('/api/wallet'),
+  getWallet: () => api.get<any>('/wallet'),
   getTransactions: (params?: { page?: number; limit?: number; type?: string }) =>
-    api.get<PaginatedResponse<any>>('/api/wallet/transactions', { params }),
-  topUp: (amount: number, method: string) => api.post<any>('/api/wallet/top-up', { amount, method }),
-  withdraw: (amount: number, method: string) => api.post<any>('/api/wallet/withdraw', { amount, method }),
+    api.get<PaginatedResponse<any>>('/wallet/transactions', { params }),
+  deposit: (data: { amount: number; idempotencyKey?: string }) =>
+    api.post<any>('/wallet/deposit', data),
+  withdraw: (data: { amount: number; bank: string; accountNumber: string; accountName: string }) =>
+    api.post<any>('/wallet/withdraw', data),
+  transfer: (data: { recipientWalletId: string; amount: number; note?: string; idempotencyKey?: string }) =>
+    api.post<any>('/wallet/transfer', data),
+  setBankAccount: (data: { bank: string; accountNumber: string; accountName: string }) =>
+    api.post<any>('/wallet/bank', data),
+  addBeneficiary: (data: { bank: string; accountNumber: string; accountName: string }) =>
+    api.post<any>('/wallet/beneficiaries', data),
+  removeBeneficiary: (id: string) => api.delete(`/wallet/beneficiaries/${id}`),
+  setPin: (pin: string) => api.post<any>('/wallet/pin', { pin }),
+  verifyPin: (pin: string) => api.post<{ valid: boolean }>('/wallet/verify-pin', { pin }),
+  toggleFreeze: (freeze: boolean, pin: string) =>
+    api.post<any>('/wallet/freeze', { freeze, pin }),
+  generateQr: (data: { amount?: number; expiresInMinutes?: number }) =>
+    api.post<any>('/wallet/qr/generate', data),
+  validateQr: (token: string, amount?: number) =>
+    api.post<any>('/wallet/qr/validate', { token, amount }),
+};
+
+export const addressApi = {
+  getAddresses: () => api.get<any[]>('/addresses'),
+  createAddress: (data: { label: string; street: string; city: string; state: string; postalCode?: string; country?: string; isDefault?: boolean }) =>
+    api.post<any>('/addresses', data),
+  updateAddress: (id: string, data: { label?: string; street?: string; city?: string; state?: string; postalCode?: string; country?: string; isDefault?: boolean }) =>
+    api.put<any>(`/addresses/${id}`, data),
+  deleteAddress: (id: string) => api.delete(`/addresses/${id}`),
+  setDefaultAddress: (id: string) => api.patch(`/addresses/${id}/default`),
 };
 
 export const logisticsApi = {
-  getDrivers: (params?: { page?: number; limit?: number; search?: string; status?: string }) =>
-    api.get<PaginatedResponse<any>>('/api/logistics/drivers', { params }),
-  createDriver: (data: any) => api.post<any>('/api/logistics/drivers', data),
-  updateDriver: (id: string, data: any) => api.put<any>(`/api/logistics/drivers/${id}`, data),
-  deleteDriver: (id: string) => api.delete(`/api/logistics/drivers/${id}`),
-
-  getVehicles: (params?: { page?: number; limit?: number; search?: string; status?: string }) =>
-    api.get<PaginatedResponse<any>>('/api/logistics/vehicles', { params }),
-  createVehicle: (data: any) => api.post<any>('/api/logistics/vehicles', data),
-  updateVehicle: (id: string, data: any) => api.put<any>(`/api/logistics/vehicles/${id}`, data),
-  deleteVehicle: (id: string) => api.delete(`/api/logistics/vehicles/${id}`),
-
+  getDrivers: (params?: { page?: number; limit?: number; availableOnly?: boolean }) =>
+    api.get<PaginatedResponse<any>>('/logistics/drivers', { params }),
+  createDriver: (data: any) => api.post<any>('/logistics/drivers', data),
+  getVehicles: (params?: { page?: number; limit?: number }) =>
+    api.get<PaginatedResponse<any>>('/logistics/vehicles', { params }),
+  createVehicle: (data: any) => api.post<any>('/logistics/vehicles', data),
   getBatches: (params?: { page?: number; limit?: number; status?: string }) =>
-    api.get<PaginatedResponse<any>>('/api/logistics/batches', { params }),
-  createBatch: (data: any) => api.post<any>('/api/logistics/batches', data),
-  updateBatch: (id: string, data: any) => api.put<any>(`/api/logistics/batches/${id}`, data),
+    api.get<PaginatedResponse<any>>('/logistics/batches', { params }),
+  getBatch: (id: string) => api.get<any>(`/logistics/batches/${id}`),
+  assignBatch: (id: string, data: { driverId: string; vehicleId: string }) =>
+    api.patch<any>(`/logistics/batches/${id}/assign`, data),
+  updateBatchStatus: (id: string, data: { status: string }) =>
+    api.patch<any>(`/logistics/batches/${id}/status`, data),
+  getTracking: (batchId: string) => api.get<any[]>(`/logistics/batches/${batchId}/tracking`),
+  pushTracking: (batchId: string, data: { lat: number; lng: number; speedKmh?: number; status?: string }) =>
+    api.post<any>(`/logistics/batches/${batchId}/tracking`, data),
 };
 
 export const storageApi = {
-  upload: (file: File) => api.upload<{ url: string }>('/api/storage/upload', file),
+  upload: (file: File) => api.upload<{ key: string; url: string; size: number }>('/storage/upload', file),
+  deleteFile: (key: string) => api.delete(`/storage/files/${key}`),
+};
+
+export const aiApi = {
+  detectDisease: (file: File, data: { cropType?: string }) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (data.cropType) formData.append('cropType', data.cropType);
+    return api.post<any>('/ai/detect-disease', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  pricePrediction: (data: { commodityId: string; days?: number }) =>
+    api.post<any>('/ai/price-prediction', data),
+  cropRecommendation: (data: { location: string; soilType?: string; budget?: number; season?: string }) =>
+    api.post<any>('/ai/crop-recommendation', data),
+  getMarketInsights: () => api.get<any>('/ai/market-insights'),
+  chat: (data: { message: string }) => api.post<any>('/ai/chat', data),
 };
 
 export default api;

@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '../../../components/ui/badge';
@@ -39,7 +41,7 @@ function formatDate(date: string): string {
   });
 }
 
-type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+type OrderStatus = 'pending' | 'processing' | 'shipped' | 'in_transit' | 'delivered' | 'cancelled';
 
 interface OrderItem {
   id: string;
@@ -143,11 +145,12 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; bgColor:
   pending: { label: 'Pending', color: 'text-amber-700', bgColor: 'bg-amber-100 border-amber-200' },
   processing: { label: 'Processing', color: 'text-blue-700', bgColor: 'bg-blue-100 border-blue-200' },
   shipped: { label: 'Shipped', color: 'text-purple-700', bgColor: 'bg-purple-100 border-purple-200' },
+  in_transit: { label: 'In Transit', color: 'text-indigo-700', bgColor: 'bg-indigo-100 border-indigo-200' },
   delivered: { label: 'Delivered', color: 'text-green-700', bgColor: 'bg-green-100 border-green-200' },
   cancelled: { label: 'Cancelled', color: 'text-red-700', bgColor: 'bg-red-100 border-red-200' },
 };
 
-const statusOrder: OrderStatus[] = ['pending', 'processing', 'shipped', 'delivered'];
+const statusOrder: OrderStatus[] = ['pending', 'processing', 'shipped', 'in_transit', 'delivered'];
 
 interface OrderCardProps {
   order: Order;

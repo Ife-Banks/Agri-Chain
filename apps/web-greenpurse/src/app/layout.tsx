@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { AppShell } from '../components/layout/AppShell';
+import { Providers } from './providers';
 import '@aisuce/ui/src/tokens/colors.css';
 import '@aisuce/ui/src/tokens/typography.css';
 import '@aisuce/ui/src/tokens/spacing.css';
@@ -24,7 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           flexDirection: 'column',
         }}
       >
-        <AppShell>{children}</AppShell>
+        <Providers>
+          <AppShell>{children}</AppShell>
+        </Providers>
       </body>
     </html>
   );

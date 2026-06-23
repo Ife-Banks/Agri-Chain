@@ -11,29 +11,30 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aisuce/ui": "workspace:*",
-    "@aisuce/types": "workspace:*",
     "@aisuce/schemas": "workspace:*",
-    "next": "^14.2.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0",
-    "zustand": "^4.5.0",
+    "@aisuce/types": "workspace:*",
+    "@aisuce/ui": "workspace:*",
+    "@googlemaps/react-wrapper": "^1.1.0",
     "@tanstack/react-query": "^5.30.0",
     "axios": "^1.6.0",
-    "socket.io-client": "^4.7.0",
-    "react-hook-form": "^7.50.0",
-    "zod": "^3.22.0",
-    "recharts": "^2.12.0",
     "framer-motion": "^11.0.0",
-    "@googlemaps/react-wrapper": "^1.1.0",
+    "lucide-react": "^1.20.0",
+    "next": "^14.2.0",
+    "next-pwa": "^5.6.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-hook-form": "^7.50.0",
     "react-qr-code": "^2.0.0",
-    "next-pwa": "^5.6.0"
+    "recharts": "^2.12.0",
+    "socket.io-client": "^4.7.0",
+    "zod": "^3.22.0",
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@testing-library/react": "^14.2.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "typescript": "^5.5.0",
-    "vitest": "^1.6.0",
-    "@testing-library/react": "^14.2.0"
+    "vitest": "^1.6.0"
   }
 }
