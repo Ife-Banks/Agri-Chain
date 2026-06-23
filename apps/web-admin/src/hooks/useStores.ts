@@ -58,6 +58,7 @@ export function useStores(params?: { page?: number; limit?: number; search?: str
     stores: data?.data || [],
     total: data?.total || 0,
     page: data?.page || 1,
+    totalPages: data?.totalPages || 1,
     isLoading,
     error,
     verifyStore: verifyMutation.mutate,
